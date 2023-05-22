@@ -46,6 +46,20 @@ describe('[Challenge] Backdoor', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
+        await ((await ethers.getContractFactory("WalletRegistryAttacker", player)).deploy(
+            walletRegistry.address,
+            walletFactory.address,
+            users,
+        ));
+        /*
+        Explanation:
+        Gnosis Safe Proxies (which are just smart contract wallets) allow you to create them and execute
+        an initializer with a delegatecall within one transaction.
+        We create proxies with the beneficiaries as owners, but our initializer approves our attacker contract
+        as a spender.
+        The Registry callback transfers tokens to the newly created wallets.
+        The attacker immediately transfers from these wallets to ${player.address}. 
+        */
     });
 
     after(async function () {
