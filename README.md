@@ -8,6 +8,8 @@ As soluções apresentadas foram elaboradas por [@izcoser](https://github.com/iz
 
 ## Como jogar
 
+Na branch ```main```:
+
 1. Clone este repositório.
 2. Instale as dependências: ```yarn install```.
 3. Programe sua solução no teste de cada desafio. Você deve ser, exclusivamente, a conta ```player```.
@@ -16,6 +18,8 @@ As soluções apresentadas foram elaboradas por [@izcoser](https://github.com/iz
 Nota:  em alguns desafios, será necessário programar seus próprios contratos de ataque.  
 
 ## Problemas e Soluções
+
+Para ver as soluções e explicações, troque para a branch ```solutions```.
 
 ### Desafio #1 - Unstoppable
 
@@ -27,19 +31,6 @@ Você começa com 10 tokens DVT em saldo.
 
 [Resolva o desafio](test/unstoppable/unstoppable.challenge.js)
 
-<details>
-  <summary>Explicação</summary>
-
-    Depositar qualquer número de DVT no cofre aumentará o seu saldo. (Linha 95 em ```UnstoppableVault.sol```).
-    A oferta total de tokens do cofre, oDVT, não é aumentada porque a função ```deposit()``` não foi chamada,
-    logo não há chamada para ```_mint()``` e a variável ```totalSupply``` permance igual.
-
-    Assim, na Linha 96: ```if (convertToShares(totalSupply) != balanceBefore) revert InvalidBalance();``` acontece um ```revert```,
-    uma vez que a contabilidade interna de tokens do cofre difere do verdadeiro número de tokens que ele possui.
-  
-</details>
-
-
 ### Desafio #2 - Naive receiver
 
 Existe uma <em>pool</em> com 1000 ETH em saldo, oferecendo <em>flash loans</em>. Elas tem uma taxa fixa de 1 ETH.
@@ -49,16 +40,6 @@ Tome todo o ETH do contrato do usuário, se possível em uma única transação.
 [Veja os contratos](contracts/naive-receiver)
 
 [Resolva o desafio](test/naive-receiver/naive-receiver.challenge.js)
-
-<details>
-  <summary>Explicação</summary>
-
-    O contrato naive receiver permite que qualquer um inicie
-    uma flashLoan() para o seu endereço.
-    A taxa de flash loan é de 1 ETH para cada chamada,
-    logo chamamos 10 vezes.
-  
-</details>
 
 ### Desafio #3 - Truster
 Mais e mais <em>lending pools</em> estão oferecendo <em>flash loans</em>. Nesse caso, uma nova <em>pool</em> está oferecendo <em>flash loans</em> de tokens DVT de graça.
@@ -70,17 +51,6 @@ Para passar neste desafio, tome todos os tokens da <em>pool</em>. Se possível e
 
 [Resolva o desafio](test/truster/truster.challenge.js)
 
-<details>
-  <summary>Explicação</summary>
-
-    A pool de flash loans pode chamar qualquer contrato
-    com qualquer call data arbitrário.
-    Então, dizemos para a pool chamar o contrato DVT
-    e aprovar gastos para nosso contrato atacante.
-    Depois, nosso contrato simplesmente move todos os tokens.
-  
-</details>
-
 ### Desafio #4 - Side Entrance
 
 Uma <em>pool</em> surpreendentemente simples permite que qualquer pessoa deposite ETH e o resgate a qualquer momento.
@@ -90,22 +60,6 @@ Iniciando com 1 ETH em saldo, passe o desafio tomando todo o ETH da <em>pool</em
 [Veja os contratos](contracts/side-entrance)
 
 [Resolva o desafio](test/side-entrance/side-entrance.challenge.js)
-
-<details>
-  <summary>Explicação</summary>
-
-    Nesse desafio, obtemos uma flash loan e usamos os fundos
-    para redepositá-los no contrato. O contrato verifica se
-    a flash loan foi paga, e ela foi, pois a verificação
-    de saldo é satisfeita.
-    No entanto, a pool também registra que temos um saldo
-    igual àquele valor que depositamos para pagar a flash loan.
-    Logo, simplesmente resgatamos o dinheiro depois.
-    
-    Nota: esse tipo de exploit já ocorreu diversas vezes
-    em projetos do mundo real.
-
-</details>
 
 ### Desafio #5 - The Rewarder
 
@@ -121,18 +75,6 @@ Por falar nisso, há rumores que uma nova <em>pool</em> foi lançada e ela está
 
 [Resolva o desafio](test/the-rewarder/the-rewarder.challenge.js)
 
-<details>
-  <summary>Explicação</summary>
-
-    Neste desafio, esperamos 5 dias para a próxima seção
-    de benefícios. Então, pegamos uma flash loan de DVT tokens.
-    Depositamos essa quantidade.
-    Resgatamos todos os benefícios que essa quantidade de DVT proporciona.
-    Pagamos o empréstimo.
-    Assim, conseguimos os benefícios sem nunca ter um DVT.
-
-</details>
-
 ### Desafio #6 - Selfie
 
 Uma nova <em>lending pool</em> foi lançada. Ela está oferecendo <em>flash loans</em> de tokens DVT. Inclui até um elaborado mecanismo de governança para controlá-la.
@@ -144,24 +86,6 @@ Você começa com 0 tokens DVT e a <em>pool</em> possui 1.5 milhões de tokens. 
 [Veja os contratos](contracts/selfie)
 
 [Resolva o desafio](test/selfie/selfie.challenge.js)
-
-<details>
-  <summary>Explicação</summary>
-
-    Neste desafio, podemos agendar ações no contrato de governança se possuímos mais da metade
-    da quantidade total de tokens no último snapshot.
-    Então, tomamos uma flash loan de 1.5M tokens (quantidade total é 2M).
-    Ativamos uma snapshot.
-    Agendamos uma ação que diz "mover todos os tokens dessa pool para o player".
-    Esperamos 2 dias.
-    Executamos a ação.
-
-    Alguns furos nesse desafio em uma situação real:
-    1. Todos os usuários realmente seriam capazes de tirar snapshots a qualquer momento? 
-    2. Usuários provavelmente alertariam uns aos outros de que o exploit estaria ocorrendo,
-    e então a maioria resgataria seus tokens antes dos 2 dias de delay.
-
-</details>
 
 ### Desafio #7 - Compromised
 
@@ -190,21 +114,6 @@ Iniciando com somente 0.1 ETH, passe o desafio obtendo todo o ETH disponível na
 
 [Resolva o desafio](test/compromised/compromised.challenge.js)
 
-<details>
-  <summary>Explicação</summary>
-
-    O web server vazou as chaves privadas para o segundo e terceiro reportador do oráculo.
-    A chave privada é o valor hex para ASCII, e então decodificado em base64, que resulta
-    nas duas chaves privadas.
-    
-    Com as chaves, usamos os reportadores para dizer que o preço da NFT é 1 wei.
-    Compramos as NFTs.
-    Reportamos novamente, desta vez que o preço é de INICIAL + 1 wei.
-    Vendemos.
-    Reportamos o preço inicial novamente. 
-
-</details>
-
 ### Desafio #8 - Puppet
 
 Existe uma <em>lending pool</em> onde usuários podem pegar empréstimos de Damn Valuable Tokens (DVTs). Para isso, eles precisam, antes, depositar o dobro do valor em ETH como colateral. A <em>pool</em> atualmente possui 100000 DVTs em liquidez.
@@ -217,18 +126,6 @@ Passe o desafio obtendo todos os tokens da <em>lending pool</em>. Você começa 
 
 [Resolva o desafio](test/puppet/puppet.challenge.js)
 
-<details>
-  <summary>Explicação</summary>
-
-    A pool Uniswap tem uma liquidez extremamente baixa em relação à nossa quantidade de tokens DVT.
-    Eles tem apenas 10 ETH e 10 DVT, enquanto temos 1000 DVT.
-    Logo, podemos criar um contrato atacante que vende os 1000 DVT na pool, em troca de ETH.
-    Então, pegamos emprestado uma grande quantidade de DVT com nosso ETH, já que o preço foi derrubado.
-    
-    Então transferimos para o jogador.
-
-</details>
-
 
 ### Desafio #9 - Puppet V2
 
@@ -240,19 +137,6 @@ Você começa com 20 ETH e 10000 DVT em saldo. A <em>pool</em> possui um milhão
 [Veja os contratos](contracts/puppet-v2)
 
 [Resolva o desafio](test/puppet-v2/puppet-v2.challenge.js)
-
-<details>
-  <summary>Explicação</summary>
-
-    Exatamente o mesmo procedimento do ataque anterior.
-    Vendemos nosso DVT na pool Uniswap.
-    Pegamos empréstimo de DVT.
-    Desta vez, feito sem contrato atacante porque não há requerimento de número de transações.
-    Acredito que esse desafio não adicione nada de novo, além de aumentar a familiaridade com
-    as funções do Uniswap V2.
-
-</details>
-
 
 ### Desafio #10 - Free Rider
 
@@ -267,21 +151,6 @@ Se apenas você pudesse conseguir um pouco de ETH de graça, pelo menos por um i
 [Veja os contratos](contracts/free-rider)
 
 [Resolva o desafio](test/free-rider/free-rider.challenge.js)
-
-<details>
-  <summary>Explicação</summary>
-
-    Devido a um bug na implementação, o contrato verifica o seu pagamento
-    apenas uma vez para uma compra em massa. Ou seja, podemos comprar
-    todos os 6 tokens por 15 ETH no lugar de 15 ETH por cada token.
-
-    Assim, pegamos 15 WETH em uma flash swap da Uniswap.
-    Transformamos os WETH em ETH.
-    Compramos os 6 tokens.
-    Enviamos para a recovery e obtemos o nosso prêmio de 45 ETH.
-    Por fim, pagamos a flash swap devolvendo 15 ETH para Uniswap.
-    
-</details>
 
 
 ### Desafio #11 - Backdoor
@@ -302,23 +171,6 @@ Resolva o desafio
 
 [Resolva o desafio](test/backdoor/backdoor.challenge.js)
 
-
-<details>
-  <summary>Explicação</summary>
-
-    Gnosis Safe Proxies são carteiras baseadas em smart contracts, ao contrário de carteiras
-    convencionais baseadas em chaves privadas. As carteiras criadas podem ser configuradas com
-    um initializer, de tal forma que a carteira é criada e pode imediatamente executar código
-    arbitrário.
-
-    Logo, criamos carteiras em nome dos beneficiários, de forma que somente eles terão acesso
-    no futuro, mas passamos um initializer que aprova gastos controlados pelo nosso contrato atacante.
-
-    Assim, o callback do cartório vê que as carteiras são criadas e imediatamente transfere tokens para elas. E nosso contrato atacante simplesmente transfere dessas carteiras para o player.
-    
-</details>
-
-
 ### Desafio #12 - Climber
 
 Existe um contrato de cofre seguro guardando 10 milhões de tokens DVT. O cofre é <em>upgradeable</em>, seguindo o [UUPS pattern](https://eips.ethereum.org/EIPS/eip-1822).
@@ -334,39 +186,6 @@ Para passar esse desafio, obtenha todos os tokens do cofre.
 [Veja os contratos](contracts/climber)
 
 [Resolva o desafio](test/climber/climber.challenge.js)
-
-<details>
-  <summary>Explicação</summary>
-
-    O contrato Timelock permite que qualquer ação seja executada, por qualquer usuário,
-    e somente depois verifica se essa ação foi mesmo agendada anteriormente. Caso contrário, a execução é revertida.
-
-    O ataque aqui consiste em executar ações arbitrárias e então manipular a agenda para que
-    a verificação passe e o contrato "pense" que a ação havia sido agendada previamente.
-
-    Logo, a ação arbitrária que precisamos fazer, consiste em:
-    a. dar o papel de "Proposer" para nosso contrato atacante, permitindo que ele manipule a agenda.
-    b. setar updateDelays para 0, de forma que ações podem ser agendadas e executadas na mesma transação.
-    c. transferir a propriedade do cofre para nós mesmos, para que assim façamos um upgrade malicioso na implementação.
-    d. agendar todas as ações (incluindo esta), para passar na checagem.
-
-    Aqui, caimos num problema de recursão interessante.
-    Se executamos x, depois agendamos x, a operação executada será:
-    (x, agendar x)
-
-    Mas na agenda constará apenas:
-    (x)
-
-    Logo, a execução reverterá.
-
-    A solução para esse problema é ofuscar o agendamento em uma função y
-    no contrato de ataque. A função y agenda no Timelock as ações (x, y).
-    Dessa forma, o contrato Timelock enxerga:
-    Execução: (x, y) 
-    Agendamento: (x, y) # agendamento manipulado puramente pelo contrato atacante, de forma ofuscada.
-
-
-</details>
 
 
 ### Desafio #13 - Wallet Mining
