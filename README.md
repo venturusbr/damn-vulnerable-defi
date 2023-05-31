@@ -338,32 +338,32 @@ Para passar esse desafio, obtenha todos os tokens do cofre.
 <details>
   <summary>Explicação</summary>
 
-  O contrato Timelock permite que qualquer ação seja executada, por qualquer usuário,
-  e somente depois verifica se essa ação foi mesmo agendada anteriormente. Caso contrário, a execução é revertida.
-  
-  O ataque aqui consiste em executar ações arbitrárias e então manipular a agenda para que
-  a verificação passe e o contrato "pense" que a ação havia sido agendada previamente.
+    O contrato Timelock permite que qualquer ação seja executada, por qualquer usuário,
+    e somente depois verifica se essa ação foi mesmo agendada anteriormente. Caso contrário, a execução é revertida.
 
-  Logo, a ação arbitrária que precisamos fazer, consiste em:
-  a. dar o papel de "Proposer" para nosso contrato atacante, permitindo que ele manipule a agenda.
-  b. setar updateDelays para 0, de forma que ações podem ser agendadas e executadas na mesma transação.
-  c. transferir a propriedade do cofre para nós mesmos, para que assim façamos um upgrade malicioso na implementação.
-  d. agendar todas as ações (incluindo esta), para passar na checagem.
+    O ataque aqui consiste em executar ações arbitrárias e então manipular a agenda para que
+    a verificação passe e o contrato "pense" que a ação havia sido agendada previamente.
 
-  Aqui, caimos num problema de recursão interessante.
-  Se executamos x, depois agendamos x, a operação executada será:
-  (x, agendar x)
-  
-  Mas na agenda constará apenas:
-  (x)
+    Logo, a ação arbitrária que precisamos fazer, consiste em:
+    a. dar o papel de "Proposer" para nosso contrato atacante, permitindo que ele manipule a agenda.
+    b. setar updateDelays para 0, de forma que ações podem ser agendadas e executadas na mesma transação.
+    c. transferir a propriedade do cofre para nós mesmos, para que assim façamos um upgrade malicioso na implementação.
+    d. agendar todas as ações (incluindo esta), para passar na checagem.
 
-  Logo, a execução reverterá.
+    Aqui, caimos num problema de recursão interessante.
+    Se executamos x, depois agendamos x, a operação executada será:
+    (x, agendar x)
 
-  A solução para esse problema é ofuscar o agendamento em uma função y
-  no contrato de ataque. A função y agenda no Timelock as ações (x, y).
-  Dessa forma, o contrato Timelock enxerga:
-  Execução: (x, y) 
-  Agendamento: (x, y) # agendamento manipulado puramente pelo contrato atacante, de forma ofuscada.
+    Mas na agenda constará apenas:
+    (x)
+
+    Logo, a execução reverterá.
+
+    A solução para esse problema é ofuscar o agendamento em uma função y
+    no contrato de ataque. A função y agenda no Timelock as ações (x, y).
+    Dessa forma, o contrato Timelock enxerga:
+    Execução: (x, y) 
+    Agendamento: (x, y) # agendamento manipulado puramente pelo contrato atacante, de forma ofuscada.
 
 
 </details>
