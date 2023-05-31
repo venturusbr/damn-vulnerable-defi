@@ -25,7 +25,7 @@ Você começa com 10 tokens DVT em saldo.
 
 [Veja os contratos](contracts/unstoppable)
 
-[Veja a solução](test/unstoppable/unstoppable.challenge.js)
+[Resolva o desafio](test/unstoppable/unstoppable.challenge.js)
 
 <details>
   <summary>Explicação</summary>
@@ -48,7 +48,7 @@ Tome todo o ETH do contrato do usuário, se possível em uma única transação.
 
 [Veja os contratos](contracts/naive-receiver)
 
-[Veja a solução](test/naive-receiver/naive-receiver.challenge.js)
+[Resolva o desafio](test/naive-receiver/naive-receiver.challenge.js)
 
 <details>
   <summary>Explicação</summary>
@@ -68,7 +68,7 @@ Para passar neste desafio, tome todos os tokens da <em>pool</em>. Se possível e
 
 [Veja os contratos](contracts/truster)
 
-[Veja a solução](test/truster/truster.challenge.js)
+[Resolva o desafio](test/truster/truster.challenge.js)
 
 <details>
   <summary>Explicação</summary>
@@ -89,7 +89,7 @@ Iniciando com 1 ETH em saldo, passe o desafio tomando todo o ETH da <em>pool</em
 
 [Veja os contratos](contracts/side-entrance)
 
-[Veja a solução](test/side-entrance/side-entrance.challenge.js)
+[Resolva o desafio](test/side-entrance/side-entrance.challenge.js)
 
 <details>
   <summary>Explicação</summary>
@@ -119,7 +119,7 @@ Por falar nisso, há rumores que uma nova <em>pool</em> foi lançada e ela está
 
 [Veja os contratos](contracts/the-rewarder)
 
-[Veja a solução](test/the-rewarder/the-rewarder.challenge.js)
+[Resolva o desafio](test/the-rewarder/the-rewarder.challenge.js)
 
 <details>
   <summary>Explicação</summary>
@@ -143,7 +143,7 @@ Você começa com 0 tokens DVT e a <em>pool</em> possui 1.5 milhões de tokens. 
 
 [Veja os contratos](contracts/selfie)
 
-[Veja a solução](test/selfie/selfie.challenge.js)
+[Resolva o desafio](test/selfie/selfie.challenge.js)
 
 <details>
   <summary>Explicação</summary>
@@ -188,7 +188,7 @@ Iniciando com somente 0.1 ETH, passe o desafio obtendo todo o ETH disponível na
 
 [Veja os contratos](contracts/compromised)
 
-[Veja a solução](test/compromised/compromised.challenge.js)
+[Resolva o desafio](test/compromised/compromised.challenge.js)
 
 <details>
   <summary>Explicação</summary>
@@ -215,7 +215,7 @@ Passe o desafio obtendo todos os tokens da <em>lending pool</em>. Você começa 
 
 [Veja os contratos](contracts/puppet)
 
-[Veja a solução](test/puppet/puppet.challenge.js)
+[Resolva o desafio](test/puppet/puppet.challenge.js)
 
 <details>
   <summary>Explicação</summary>
@@ -239,7 +239,7 @@ Você começa com 20 ETH e 10000 DVT em saldo. A <em>pool</em> possui um milhão
 
 [Veja os contratos](contracts/puppet-v2)
 
-[Veja a solução](test/puppet-v2/puppet-v2.challenge.js)
+[Resolva o desafio](test/puppet-v2/puppet-v2.challenge.js)
 
 <details>
   <summary>Explicação</summary>
@@ -266,7 +266,7 @@ Se apenas você pudesse conseguir um pouco de ETH de graça, pelo menos por um i
 
 [Veja os contratos](contracts/free-rider)
 
-[Veja a solução](test/free-rider/free-rider.challenge.js)
+[Resolva o desafio](test/free-rider/free-rider.challenge.js)
 
 <details>
   <summary>Explicação</summary>
@@ -296,11 +296,11 @@ Seu objetivo é obter todos os fundos do cartório. Em uma única transação.
 
 Veja os contratos
 Complete o desafio
-Veja a solução
+Resolva o desafio
 
 [Veja os contratos](contracts/backdoor)
 
-[Veja a solução](test/backdoor/backdoor.challenge.js)
+[Resolva o desafio](test/backdoor/backdoor.challenge.js)
 
 
 <details>
@@ -333,7 +333,7 @@ Para passar esse desafio, obtenha todos os tokens do cofre.
 
 [Veja os contratos](contracts/climber)
 
-[Veja a solução](test/climber/climber.challenge.js)
+[Resolva o desafio](test/climber/climber.challenge.js)
 
 <details>
   <summary>Explicação</summary>
@@ -381,7 +381,7 @@ Passe o desafio obtendo todos os tokens controlados pelo contrato <em>wallet dep
 
 [Veja os contratos](contracts/wallet-mining)
 
-[Veja a solução](test/wallet-mining/wallet-mining.challenge.js)
+[Resolva o desafio](test/wallet-mining/wallet-mining.challenge.js)
 
 ### Desafio 14 - Puppet V3
 
@@ -397,7 +397,7 @@ NOTA: ao contrário dos outros, este desafio requer conexão a uma URL de RPC v�
 
 [Veja os contratos](contracts/puppet-v3)
 
-[Veja a solução](test/puppet-v3/puppet-v3.challenge.js)
+[Resolva o desafio](test/puppet-v3/puppet-v3.challenge.js)
 
 
 ### Desafio 15 - ABI Smuggling
@@ -412,7 +412,7 @@ Antes que seja tarde, resgate os fundos do cofre e transfira para a conta de rec
 
 [Veja os contratos](contracts/abi-smuggling)
 
-[Veja a solução](test/abi-smuggling/abi-smuggling.challenge.js)
+[Resolva o desafio](test/abi-smuggling/abi-smuggling.challenge.js)
 
 ## Disclaimer
 

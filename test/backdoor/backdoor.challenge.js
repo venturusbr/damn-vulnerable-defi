@@ -46,30 +46,6 @@ describe('[Challenge] Backdoor', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
-        await ((await ethers.getContractFactory("WalletRegistryAttacker", player)).deploy(
-            walletRegistry.address,
-            walletFactory.address,
-            users,
-        ));
-        /*
-        Explanation:
-        Gnosis Safe Proxies (which are just smart contract wallets) allow you to create them and execute
-        an initializer with a delegatecall within one transaction.
-        We create proxies with the beneficiaries as owners, but our initializer approves our attacker contract
-        as a spender.
-        The Registry callback transfers tokens to the newly created wallets.
-        The attacker immediately transfers from these wallets to ${player.address}.
-
-        Note: why do we need an intermediary contract instead of calling the ERC-20 directly with an encoded approval?
-        DELEGATECALL basically says that I'm a contract and I'm allowing (delegating) you to do whatever you want to my storage.
-        Which means, if the target modifies storage, that storage must be present, in the same layout, in the original contract.
-        If we DELEGATECALL to the ERC-20 approve function, the target will simply modify the allowances mapping, as if it were present in the origin.
-        But it's not present, since the origin is a Gnosis Safe contract, not an ERC-20. That means the DELEGATECALL is useless.
-
-        For that reason, we deploy a second contract which does not modify storage, but rather calls the ERC-20 for an approval.
-        It's important to note that, in DelegateCallbackAttack::approve, msg.sender is still the Factory contract.
-        msg.sender becomes the Safe in the inner function call `IERC20(token).approve(spender, type(uint256).max)`.
-        */
     });
 
     after(async function () {

