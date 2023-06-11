@@ -383,6 +383,59 @@ Passe o desafio obtendo todos os tokens controlados pelo contrato <em>wallet dep
 
 [Veja a solução](test/wallet-mining/wallet-mining.challenge.js)
 
+<details>
+  <summary>Explicação</summary>
+
+    O desafio é dividido em duas partes.
+    A primeira parte: obter 20 milhões de tokens de DEPOSIT_ADDRESS.
+    A segunda parte: obter 43 tokens de WalletDeployer.
+
+    A primeira parte requer que façamos o deploy de uma carteira Gnosis Safe em DEPOSIT_ADDRESS, para assim obter os tokens.
+    O deploy de safes ocorre quando a função createProxy() é chamada em um GnosisSafeProxyFactory.
+
+    Como os safes são criados com o opcode CREATE, o endereço do safe será keccak256(sender, nonce), onde sender é a factory e nonce é o número de contratos criados por ela.
+
+    Se procurarmos pelo endereço da factory `0x76E2...` na internet, vemos que existem GnosisSafeProxyFactory neste endereço em diversas blockchains. Eles foram criados pelo endereço `0x1aa...` marcado como Gnosis Safe Deployer. No entanto, neste desafio, não temos nem a factory nem a mastercopy implantada na rede.
+
+    Para fazer deploy desses contratos nesses endereços exatos, precisaríamos enviar transações do endereço `0x1aa...`. Mas isso é impossível sem possuir a chave privada desse endereço, então o que fazer?
+
+    É simples. Podemos obter a transação assinada do primeiro deploy desses contratos lá na rede Ethereum, de muitos anos atrás, e retransmitir essas transações na nossa rede. Dessa forma, vai parecer que `0x1aa...` está enviando novos contratos and ocorrerá o deploy no endereço que queremos.
+
+    Nota: isso é chamado de replay attack, quando transações de uma rede são retransmitidas em outra rede. Isso é possível porque, antes da EIP-155, transações não especificavam um id de rede e assim poderiam ser transmitidas em qualquer blockchain. A transação assinada pode ser obtida no Etherscan ao clicar em "More" -> "Get Raw Tx Hex".
+
+    Com a Factory implantada, podemos tentar gerar um safe em DEPOSIT_ADDRESS. Já que tokens foram mandados para lá, é factível pensar que um safe eventualmente gera esse endereço em um nonce específico.
+
+    Criamos um laço para prever endereços de deploy e verificamos que no nonce = 43, a factory `0x76E2...` vai fazer deploy de um safe em DEPOSIT_ADDRESS.
+
+    Então, criamos 42 safes normais e no safe 43 especificamos uma implementação modificada, além de codificar uma chamada de função "attack" que imediatamente transfere os 20 milhões de tokens para nós. Outra opção seria usar a implementação regular e simplesmente chamar execTransaction para obter todos os tokens.
+
+    Nota: este ataque realmente ocorreu e resultou no roubo de 20 milhões de tokens OP. O endereço multisig da Wintermute não existia na rede Optimism, mas mesmo assim o time Optimism enviou os tokens para lá. Um hacker percebeu a situação, fez o replay das transações para criar uma Factory na Optimism e então fez 10644 chamadas para createProxy() até gerar o endereço da Wintermute. Todos os fundos foram roubados.
+
+    Leia mais em: https://inspexco.medium.com/how-20-million-op-was-stolen-from-the-multisig-wallet-not-yet-owned-by-wintermute-3f6c75db740a
+
+    Segunda parte do desafio.
+
+    Precisamos chamar a função drop() no WalletDeployer 43 vezes, e em cada vez ganharemos um token.
+
+    A função drop() chama a função can(), que está em assembly para maior dificuldade, mas podemos perceber que ela está chamando a função can() do contrato AuthorizerUpgradeable.sol.
+    É necessário estar na whitelist para passar a checagem de can().
+
+    Como apenas o contrato Proxy foi inicializado e não o contrato de implementação, obtemos o endereço da implementação e inicializamos o contrato, tornando-nos dono.
+
+    Como dono, fazemos um upgrade para um contrato de ataque que se auto destrói, deletando todo o código na implementação.
+
+    Assim, a função can() faz 3 checagens:
+        if iszero(extcodesize(m)) {return(0, 0)} <- Não falha aqui, pois m é o endereço do Proxy e ainda há código lá.
+
+        if iszero(staticcall(gas(),m,p,0x44,p,0x20)) <- Não falha aqui, pois a função chamada não existe e é uma chamada de baixo nível que não checa a existência da função, então passa com sucesso.
+
+        if and(not(iszero(returndatasize())), iszero(mload(p))) {return(0,0)} <- O tamanho dos dados de retorno deve ser zero ou o dado de retorno não deve ser zero. Passa neste check porque não há dado de retorno.
+    
+    Finalmente, a chamada retorna true e permite a execução de drop().
+
+    Nota: leitura importante sobre esta vulnerabilidade nos upgrades UUPS: https://forum.openzeppelin.com/t/uupsupgradeable-vulnerability-post-mortem/15680
+</details>
+
 ### Desafio 14 - Puppet V3
 
 Mesmo em um <em>bear market</em>, os desenvolvedores da Puppet continuam construindo.
