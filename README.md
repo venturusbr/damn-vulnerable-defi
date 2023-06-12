@@ -489,6 +489,45 @@ Antes que seja tarde, resgate os fundos do cofre e transfira para a conta de rec
 
 [Veja a solução](test/abi-smuggling/abi-smuggling.challenge.js)
 
+<details>
+  <summary>Explicação</summary>
+
+    No último desafio, temos um cofre permissionado.
+
+    A função execute(address target, bytes actionData) permite que qualquer um faça uma chamada de função, desde que tenha permissão para executar esta função específica. No caso, temos permissão apenas para chamar a função withdraw(), que retira 1 ETH a cada 15 dias. Isso levará muito tempo, até resgatar todo o dinheiro, nosso cofre será hackeado.
+
+    Analisando a função execute(), vemos que ela verifica qual função vamos chamar pela leitura dos quatro bytes entre [100 a 103] da nossa call data, de acordo com a linha 52 de AuthorizedExecutor.sol.
+
+    No entanto, é possível manipular nossa chamada para passar qualquer sequência de bytes nessa posição. Para explicar isso, precisamos explicar como a calldata é empacotada para uma função na Ethereum Virtual Machine.
+
+    A EVM empacota a call data desta forma:
+
+                4 bytes         32 bytes        32 bytes
+    [ FUNCTION SELECTOR ] [ ARGUMENT 1 ] [ ARGUMENT 2 ] ...
+
+    Quando o argumento é um endereço, o formato é: 24 zeros + endereço (já que um endereço ocupa apenas 20 bytes).
+    Quando um argumento A é do tipo bytes, um slot de 32 bytes é criado que aponta para X, onde os dados começam. Na posição X, outro slot de 32 bytes informa o tamanho de A, e logo após vem A em si.
+
+    Sendo assim, podemos criar uma call data do tipo:
+
+        4 bytes         32 bytes        32 bytes                32 bytes              32 bytes                    32 bytes         68 bytes
+    [ FUNCTION SELECTOR ] [ ARGUMENT 1 ] [ ARGUMENT 2 ] ...
+    [       EXECUTE     ] [ VAULT ADDR ] [ ACTION DATA PTR ] [ RANDOM DATA ] [ d9caed12 + RANDOM DATA ] [ACTION DATA LENGTH] [ ACTION DATA ]
+
+    Onde [ACTION DATA] é:
+
+            4 bytes         32 bytes        32 bytes    
+    [ FUNCTION SELECTOR ] [ ARGUMENT 1 ] [ ARGUMENT 2 ]
+    [     SWEEP FUNDS   ] [ RECOVERY ADDR ] [ TOKEN ADDR ] 
+
+    Desta forma, o verificador olha para nossa call data e vê que, na posição [100 a 103] existe o valor d9caed12, que é o selector que temos permissão.
+    Mas ele não sabe que nossa verdadeira chamada de função está codificada somente mais a direita.
+
+    Note que, se não deslocarmos a ACTION DATA para a direita, incluindo-a imediatamente, o verificador impedirá a execução, pois verá que o selector é de SWEEP FUNDS e não de WITHDRAW.
+
+    Assim, conseguimos executar a função sweepFunds() que está codificada em Action Data, e transferimos o dinheiro para o endereço de recuperação
+</details>
+
 ## Disclaimer
 
 Todo o código Solidity, práticas e <em>patterns</em> neste repositório estão vulneráveis e são somente para propósitos educacionais.
