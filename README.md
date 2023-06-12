@@ -452,6 +452,28 @@ NOTA: ao contrário dos outros, este desafio requer conexão a uma URL de RPC v�
 
 [Veja a solução](test/puppet-v3/puppet-v3.challenge.js)
 
+<details>
+  <summary>Explicação</summary>
+
+    O desafio é manipular preços em uma exchange, desta vez a Uniswap V3, para conseguir um empréstimo em uma lending pool.
+    Para obter um empréstimo, precisamos depositar 3x o valor como colateral, o que inicialmente não temos.
+    Ao contrário dos desafios anteriores, que usavam a Uniswap V1 e V2, onde os preços eram ditados exatamente pelo balanço entre os dois tokens
+    em um par, a Uniswap V3 provê um oráculo onchain que calcula preços com uma média ponderada ao longo do tempo.
+    Dessa forma, no momento exato após um trade ocorrer, o preço calculado pelo oráculo não reflete as novas reservas da pool, e continua a refletir
+    o preço antigo. No entanto, com o passar do tempo, o preço se aproxima lentamente para refletir o novo equilíbrio das reservas.
+
+    Isso é feito para que, em breves momentos de alta volatilidade, o preço reportado pelo oráculo permaneça estável.
+
+    A matemática acerca deste mecanismo é sofisticada, mas pode ser entendida mais a fundo neste link:
+    https://uniswapv3book.com/docs/milestone_5/price-oracle/
+
+    Dito isso, não precisamos entender exatamente como funciona a matemática envolvida. Só precisamos entender que o novo preço não é refletido imediatamente.
+
+    Assim, basta seguir com a mesma estratégia dos outros 2 desafios:
+    1. Vendemos todo nosso DVT para desequilibrar a pool da Uniswap V3. A pool possui 100 DVT : 100 WETH, nós temos 110 DVTs, mais do que o suficiente para desequilibrá-la.
+    2. Esperamos algum tempo. Nas condições para vencer o desafio, vemos que não podemos esperar mais que 115 segundos. Então esperamos algo próximo disso.
+    3. Requisitamos um empréstimo para a lending pool, que nesse momento pergunta o preço ao oráculo nos permite obter todo o DVT. 
+</details>
 
 ### Desafio 15 - ABI Smuggling
 

